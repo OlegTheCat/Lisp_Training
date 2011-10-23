@@ -20,17 +20,14 @@
 
 
 (defun traverse (fun tree fget-node fget-children fmake-node)
-	(if (not(eq tree nil))
+	(unless (null tree)
 		(funcall fmake-node (funcall fun (funcall fget-node tree)) 
 			;Applicating the function 'traverse' to every child of the tree.
-			(labels ((traverse-children (children)
-						(if children
-							(cons (traverse fun (car children) fget-node fget-children fmake-node) (traverse-children (cdr children)))
-							nil))) (traverse-children (funcall fget-children tree))))
-		nil))
-
+			(mapcar #'(lambda (child) (when child
+										(traverse fun child fget-node fget-children fmake-node))) (funcall fget-children tree)))))
+										
 #|
-Example:
+Examples:
 (setq left-branch (make-node 1 (list (make-node 2 (list (make-node 5) (make-node 6))) (make-node 3) (make-node 4))))
 (setq right-branch (make-node 7 (list (make-node 3))))
 (setq root (make-node 8 (list left-branch right-branch)))
