@@ -126,12 +126,7 @@
 
 (defun search-value (symb const-table-lst)
 	(when const-table-lst
-		(let ((val (gethash symb (car const-table-lst))))
-			(if val
-				val
-				(search-value symb (cdr const-table-lst))
-			)
-		)
+		(or (gethash symb (car const-table-lst)) (search-value symb (cdr const-table-lst)))
 	)
 )
 
