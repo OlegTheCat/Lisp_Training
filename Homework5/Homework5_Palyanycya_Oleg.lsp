@@ -1,0 +1,46 @@
+(defun factor-func (factor)
+	(if (eq (car factor) 'lpar)
+		(expr-func (reverse(cdr (reverse (cdr factor)))))
+		(car factor)
+	)
+)
+
+(defun term-func (term &optional factor (opened-pars 0))
+	(if term
+		(if (and (or (eq (car term) 'mul) (eq (car term) 'div)) (= opened-pars 0))
+			(list 'expr (car term) (factor-func factor) (term-func (cdr term)))
+			(term-func (cdr term) (append factor (list (car term)))
+				(cond 
+					((eq (car term) 'lpar) (1+ opened-pars))
+					((eq (car term) 'rpar) (1- opened-pars))
+					(t opened-pars)
+				)
+			)
+		)
+		(factor-func factor)
+	)
+)
+
+(defun expr-func (expr &optional term (opened-pars 0))
+	(if expr
+		(if (and (or (eq (car expr) 'add) (eq (car expr) 'sub)) (= opened-pars 0))
+			(list 'expr (car expr) (term-func term) (expr-func (cdr expr)))
+			(expr-func (cdr expr) (append term (list (car expr)))
+				(cond 
+					((eq (car expr) 'lpar) (1+ opened-pars))
+					((eq (car expr) 'rpar) (1- opened-pars))
+					(t opened-pars)
+				)
+			)
+		)
+		(term-func term)
+	)
+)
+
+(defun expression (expr)
+	(expr-func expr)
+)
+
+(defun parser (lexems-lst)
+	(expression lexems-lst)
+)
